@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Octaris</title>
+<style>
+:root{--bg:#f3f4fb;--fg:#1b1e3a;--sub:#6b7099;--line:#c9cde6;--core:#e2e5f5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1020;--fg:#eef0ff;--sub:#8a90b8;--line:#2a2f55;--core:#181b35;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1020;--fg:#eef0ff;--sub:#8a90b8;--line:#2a2f55;--core:#181b35;color-scheme:dark}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none;overscroll-behavior:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#hud{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 16px;font-size:13px;color:var(--sub);pointer-events:none}
+#hud b{display:block;color:var(--fg);font-size:18px}
+#hint{position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);padding:14px;text-align:center;font-size:12.5px;line-height:1.5;color:var(--sub);pointer-events:none}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:color-mix(in srgb,var(--bg) 80%,transparent);text-align:center;padding:24px}
+#warn{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 92px);text-align:center;font-weight:800;font-size:18px;color:#ff5d73;opacity:0;transition:opacity .3s;pointer-events:none}
+#st{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 118px);text-align:center;font-size:13px;color:var(--sub);pointer-events:none}
+#sk{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);padding:0 14px;display:flex;flex-direction:column;gap:8px;align-items:center}
+#gauge{width:min(340px,100%);height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+#gf{display:block;height:100%;width:0;background:#6d5dfc}
+#btns{display:flex;gap:8px}
+#btns button{font:inherit;font-size:14px;font-weight:700;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--core);color:var(--fg);touch-action:manipulation;opacity:.4}
+#btns button.on{opacity:1;border-color:#6d5dfc}
+#btns small{display:block;font-size:11px;color:var(--sub);font-weight:600}
+.i{width:1.15em;height:1.15em;vertical-align:-.2em;margin-right:.3em}
+.ic{font-style:normal}
+#evt{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;margin-top:6px;touch-action:manipulation;cursor:pointer}
+#evt input{position:absolute;opacity:0;pointer-events:none}
+.sw{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+#evt input:checked+.sw{background:#6d5dfc}
+#evt input:checked+.sw::after{transform:translateX(18px)}
+#hud>div{flex:1}
+#pb{pointer-events:auto;width:38px;height:38px;padding:0;border-radius:12px;border:1px solid var(--line);background:var(--core);color:var(--fg);display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex:none}
+#pb .i,#rs .i{margin:0}
+#mode{position:fixed;left:16px;top:calc(env(safe-area-inset-top,0px) + 64px);display:flex;align-items:center;font-size:12px;font-weight:700;color:#6d5dfc;pointer-events:none}
+#mode.off{color:var(--sub)}
+#btns button{position:relative;padding-top:13px}
+.k{position:absolute;top:2px;right:6px;font-size:9px;font-weight:600;color:var(--sub)}
+#pz{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:color-mix(in srgb,var(--bg) 80%,transparent)}
+#pz h1{margin:0;font-size:30px;letter-spacing:.08em}
+#rs{display:flex;align-items:center;gap:6px;font:inherit;font-size:18px;font-weight:700;padding:14px 36px;border:0;border-radius:14px;background:#6d5dfc;color:#fff;touch-action:manipulation}
+#ov h1{margin:0;font-size:36px;letter-spacing:.08em}
+#ov p{margin:0;color:var(--sub);font-size:14px;line-height:1.6}
+.langs{display:flex;gap:6px;margin-top:6px}
+.langs button{font:inherit;font-size:13px;font-weight:700;padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:var(--core);color:var(--sub);touch-action:manipulation}
+.langs button.on{border-color:#6d5dfc;color:var(--fg)}
+#lg{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg);text-align:center;padding:24px}
+#lg p{margin:0;color:var(--sub);font-size:14px}
+#lg .langs{flex-direction:column;width:min(260px,100%);gap:10px}
+#lg .langs button{font-size:18px;padding:14px;border-radius:14px}
+#go{margin-top:8px;font:inherit;font-size:18px;font-weight:700;padding:14px 40px;border:0;border-radius:14px;background:#6d5dfc;color:#fff;touch-action:manipulation}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><div><span data-t="bestL">BEST</span><b id="best">0</b></div><div style="text-align:center"><span data-t="lvL">LEVEL</span><b id="lv">1</b></div><div style="text-align:right"><span data-t="clrL">CLEAR</span><b id="ln">0</b></div><button id="pb" aria-label="Pause"><i class="ic" data-i="pause"></i></button></div>
+<div id="mode"></div>
+<div id="warn"></div><div id="st"></div>
+<div id="sk"><div id="gauge"><i id="gf"></i></div><div id="btns"><button data-s="bomb"><span class="k">[1]</span><i class="ic" data-i="bomb"></i><span data-t="bomb">Bomb</span><small>40</small></button><button data-s="color"><span class="k">[2]</span><i class="ic" data-i="color"></i><span data-t="color">Recolor</span><small>25</small></button><button data-s="freeze"><span class="k">[3]</span><i class="ic" data-i="freeze"></i><span data-t="freeze">Freeze</span><small>30</small></button></div></div>
+<div id="hint" data-t="hint">Tap left / right: rotate · Tap score: drop one step<br>Link 3+ same colors to clear · Break gray stones from the side</div>
+<div id="ov"><h1 id="t">OCTARIS</h1><p id="d">Blocks of 1–3 cells fall onto the octagon from every side.<br>Link 3+ cells of the same color to clear them. Chains multiply your score, and a full ring clears too.<br>Gray stones never match, but they break when a clear happens next to them.<br>Spend the energy you earn on skills.</p><label id="evt"><input type="checkbox" id="ev" checked><span class="sw"></span><span data-t="evt">Random events</span></label><p id="ed" data-t="evd">Stone rain · Reversed controls · Fast fall</p><button id="go">Start</button><div class="langs"></div></div>
+<div id="pz"><h1 data-t="paused">PAUSED</h1><button id="rs"><i class="ic" data-i="play"></i><span data-t="resume">Resume</span></button><div class="langs"></div></div>
+<div id="lg"><p data-t="lgp">Choose your language</p><div class="langs"></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const N=8,MAXL=8,H=Math.PI/8,CH=Math.cos(H),PI4=Math.PI/4;
+const PAL=['#ff5d73','#ffb142','#4cd98c','#4cc9f0','#8f7bff','#7b8099'],NC=5,STONE=5;
+const mod=(a,n)=>((a%n)+n)%n,rnd=n=>Math.floor(Math.random()*n);
+let paused=false,evOn=true,mp=0,freeze=0,rev=0,fast=0,evT=15,W,HT,cx,cy,a0,T,rows=[],rot=0,rotA=0,p=null,score=0,lines=0,level=1,state='ready',best=0,pulse=0,fx=[],col={},last=0;
+try{best=+localStorage.getItem('octaBest')||0}catch(e){}
+const $=id=>document.getElementById(id);
+const TX={
+en:{bestL:'BEST',lvL:'LEVEL',clrL:'CLEAR',hint:'Tap left / right: rotate · Tap score: drop one step<br>Link 3+ same colors to clear · Break gray stones from the side',desc:'Blocks of 1–3 cells fall onto the octagon from every side.<br>Link 3+ cells of the same color to clear them. Chains multiply your score, and a full ring clears too.<br>Gray stones never match, but they break when a clear happens next to them.<br>Spend the energy you earn on skills.',evt:'Random events',evd:'Stone rain · Reversed controls · Fast fall',start:'Start',again:'Play again',over:'GAME OVER',paused:'PAUSED',resume:'Resume',sc:'Score',cl:'Cleared',bs:'Best',bomb:'Bomb',color:'Recolor',freeze:'Freeze',wBomb:'Bomb!',wCol:'Recolor!',wFrz:'Time freeze!',wRock:'Stone rain!',wRev:'Controls reversed! 6s',wFast:'Fast fall! 6s',sRev:'Reversed',sFast:'Fast fall',sFrz:'Frozen',sec:'s',evOn:'Events ON',evOff:'Events OFF',lgp:'Choose your language · 언어를 선택하세요 · 言語を選んでください'},
+ko:{bestL:'최고',lvL:'레벨',clrL:'제거',hint:'좌/우 터치: 회전 · 점수 터치: 한 칸 더 내리기<br>같은 색 3칸 이상 연결하면 제거 · 회색 돌은 옆에서 터뜨려 깨기',desc:'1~3칸짜리 블록이 사방에서 팔각형으로 떨어집니다.<br>같은 색 3칸 이상을 이으면 사라지고, 연쇄하면 점수가 배로 늘며, 한 바퀴를 꽉 채워도 사라집니다.<br>회색 돌은 색이 맞지 않지만, 옆에서 무언가 터지면 같이 깨집니다.<br>모은 에너지로 스킬을 쓰세요.',evt:'랜덤 이벤트',evd:'돌비 · 조작 반전 · 낙하 가속',start:'시작',again:'다시 시작',over:'게임 오버',paused:'일시정지',resume:'계속하기',sc:'점수',cl:'제거',bs:'최고',bomb:'폭탄',color:'색맞춤',freeze:'정지',wBomb:'폭탄!',wCol:'색맞춤!',wFrz:'시간 정지!',wRock:'돌비!',wRev:'조작 반전! 6초',wFast:'낙하 가속! 6초',sRev:'반전',sFast:'가속',sFrz:'정지',sec:'초',evOn:'이벤트 ON',evOff:'이벤트 OFF',lgp:'Choose your language · 언어를 선택하세요 · 言語を選んでください'},
+ja:{bestL:'ベスト',lvL:'レベル',clrL:'消去',hint:'タップ 左/右: 回転 · スコアをタップ: 1マス落とす<br>同じ色を3マス以上つなげて消す · 灰色の石は横から消して壊す',desc:'1〜3マスのブロックが八角形に四方から落ちてきます。<br>同じ色を3マス以上つなぐと消え、連鎖でスコアが倍増。ひと回り埋めても消えます。<br>灰色の石は色が合いませんが、隣で消えると一緒に壊れます。<br>貯めたエネルギーでスキルを使いましょう。',evt:'ランダムイベント',evd:'石の雨 · 操作反転 · 高速落下',start:'スタート',again:'もう一度',over:'ゲームオーバー',paused:'一時停止',resume:'再開',sc:'スコア',cl:'消去',bs:'ベスト',bomb:'爆弾',color:'色替え',freeze:'停止',wBomb:'爆弾!',wCol:'色替え!',wFrz:'タイムストップ!',wRock:'石の雨!',wRev:'操作反転! 6秒',wFast:'高速落下! 6秒',sRev:'反転',sFast:'高速',sFrz:'停止',sec:'秒',evOn:'イベント ON',evOff:'イベント OFF',lgp:'Choose your language · 언어를 선택하세요 · 言語を選んでください'}};
+let lang='en';
+function tr(k){return TX[lang][k]}
+function refreshOv(){if(state==='over'){$('t').textContent=tr('over');$('d').innerHTML=tr('sc')+' <b>'+score+'</b> · '+tr('cl')+' '+lines+'<br>'+tr('bs')+' '+best;$('go').textContent=tr('again')}else{$('t').textContent='OCTARIS';$('d').innerHTML=tr('desc');$('go').textContent=tr('start')}}
+function applyLang(){document.documentElement.lang=lang;document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=tr(e.dataset.t));refreshOv();modeUI(state==='play'?evOn:$('ev').checked);skUI.s=null;document.querySelectorAll('.langs button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang))}
+function setLang(l){lang=l;try{localStorage.setItem('octarisLang',l)}catch(e){}$('lg').style.display='none';applyLang()}
+function readCol(){const s=getComputedStyle(document.documentElement);['bg','fg','sub','line','core'].forEach(k=>col[k]=s.getPropertyValue('--'+k).trim())}
+function resize(){const dpr=Math.min(devicePixelRatio||1,3);W=innerWidth;HT=innerHeight;cv.width=W*dpr;cv.height=HT*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);cx=W/2;cy=HT/2;const S=Math.min(W,HT)/2*0.96,aMax=S*CH;a0=aMax*0.28;T=(aMax-a0)/(MAXL+2);readCol()}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,100));
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',readCol);
+const th=k=>-Math.PI/2+k*PI4;
+function cell(phi,k0,k1){const r0=(a0+k0*T)/CH,r1=(a0+k1*T)/CH,a=phi-H,b=phi+H;ctx.beginPath();ctx.moveTo(cx+r0*Math.cos(a),cy+r0*Math.sin(a));ctx.lineTo(cx+r0*Math.cos(b),cy+r0*Math.sin(b));ctx.lineTo(cx+r1*Math.cos(b),cy+r1*Math.sin(b));ctx.lineTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.closePath()}
+function ring(k){ctx.beginPath();const r=(a0+k*T)/CH;for(let i=0;i<=N;i++){const a=-Math.PI/2-H+i*PI4;ctx[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a))}}
+function stackTop(g){for(let k=rows.length-1;k>=0;k--)if(rows[k][g]>=0)return k+1;return 0}
+function maxTop(){let m=0;for(let i=0;i<p.w;i++)m=Math.max(m,stackTop(mod(p.s+i-rot,N)));return m}
+function newPiece(){const w=[1,1,2,2,2,3,3][rnd(7)],sp=Math.min(.04+level*.025,.25);p={s:rnd(N),w,c:Array.from({length:w},()=>Math.random()<sp?STONE:rnd(NC)),d:MAXL+1}}
+function hud(){$('best').textContent=best;$('lv').textContent=level;$('ln').textContent=lines}
+function start(){paused=false;$('pz').style.display='none';evOn=$('ev').checked;modeUI(evOn);mp=0;freeze=rev=fast=0;evT=15;rows=[];rot=0;rotA=0;score=0;lines=0;level=1;fx=[];state='play';newPiece();hud();$('ov').style.display='none'}
+function end(){state='over';if(score>best){best=score;try{localStorage.setItem('octaBest',best)}catch(e){}}hud();refreshOv();$('ov').style.display='flex'}
+function land(){const L=maxTop();if(L>=MAXL){end();return}
+ while(rows.length<=L)rows.push(new Array(N).fill(-1));
+ for(let i=0;i<p.w;i++)rows[L][mod(p.s+i-rot,N)]=p.c[i];
+ score+=5*p.w;mp=Math.min(100,mp+p.w);resolve();
+ 
+ 
+ hud();newPiece()}
+function resolve(){let chain=0;
+ for(;;){const kill=new Set(),seen=new Set();
+  for(let k=0;k<rows.length;k++)for(let g=0;g<N;g++){const v=rows[k][g],id=k*N+g;if(v<0||v>=NC||seen.has(id))continue;
+   const grp=[id],st=[id];seen.add(id);
+   while(st.length){const q=st.pop(),qk=(q/N)|0,qg=q%N;
+    for(const [dk,dg] of [[1,0],[-1,0],[0,1],[0,-1]]){const nk=qk+dk,ng=mod(qg+dg,N);if(nk<0||nk>=rows.length)continue;const nid=nk*N+ng;if(seen.has(nid)||rows[nk][ng]!==v)continue;seen.add(nid);grp.push(nid);st.push(nid)}}
+   if(grp.length>=3)grp.forEach(x=>kill.add(x))}
+  for(let k=0;k<rows.length;k++)if(rows[k].every(v=>v>=0))for(let g=0;g<N;g++)kill.add(k*N+g);
+  if(!kill.size)break;
+  [...kill].forEach(id=>{const k=(id/N)|0,g=id%N;for(const [dk,dg] of [[1,0],[-1,0],[0,1],[0,-1]]){const nk=k+dk,ng=mod(g+dg,N);if(nk>=0&&nk<rows.length&&rows[nk][ng]>=NC)kill.add(nk*N+ng)}});
+  chain++;kill.forEach(id=>{const k=(id/N)|0,g=id%N;fx.push({k,g,t:0});rows[k][g]=-1});
+  score+=kill.size*10*chain*level;mp=Math.min(100,mp+kill.size*3);lines+=kill.size;level=1+Math.floor(lines/15);
+  for(let g=0;g<N;g++){const vals=[];for(let k=0;k<rows.length;k++)if(rows[k][g]>=0)vals.push(rows[k][g]);for(let k=0;k<rows.length;k++)rows[k][g]=k<vals.length?vals[k]:-1}
+  while(rows.length&&rows[rows.length-1].every(v=>v<0))rows.pop()}}
+const SK={bomb:40,color:25,freeze:30},BT=[...document.querySelectorAll('#btns button')];
+const IC={bomb:'<circle cx="10" cy="14" r="6"/><path d="M14.5 9.5L17 7M17 7l1.5-3M17 7l3-1M17 7l3 1"/>',color:'<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 003-3c0-6-4-11-8-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="10" r="1"/>',freeze:'<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',rev:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',fast:'<path d="M13 2L5 13h6l-1 9 8-11h-6z"/>',rock:'<path d="M4 17l3-9 5-3 6 4 2 8-6 3z"/>',pause:'<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',play:'<path d="M8 5v14l11-7z"/>',off:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'};
+const ic=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+IC[n]+'</svg>';
+document.querySelectorAll('.ic').forEach(e=>e.innerHTML=ic(e.dataset.i));
+function warn(t){const w=$('warn');w.innerHTML=t;w.style.opacity=1;clearTimeout(warn.t);warn.t=setTimeout(()=>w.style.opacity=0,2200)}
+function skUI(){$('gf').style.width=mp+'%';BT.forEach(b=>b.classList.toggle('on',mp>=SK[b.dataset.s]));
+ const s=(rev>0?ic('rev')+tr('sRev')+' '+Math.ceil(rev)+tr('sec')+' &nbsp; ':'')+(fast>0?ic('fast')+tr('sFast')+' '+Math.ceil(fast)+tr('sec')+' &nbsp; ':'')+(freeze>0?ic('freeze')+tr('sFrz')+' '+Math.ceil(freeze)+tr('sec'):'');if(skUI.s!==s){skUI.s=s;$('st').innerHTML=s}}
+function useSkill(n){if(state!=='play'||paused||mp<SK[n])return;mp-=SK[n];
+ if(n==='bomb'){const s=Math.max(0,rows.length-2);for(let k=s;k<rows.length;k++)for(let g=0;g<N;g++)if(rows[k][g]>=0)fx.push({k,g,t:0});rows.splice(s);warn(ic('bomb')+tr('wBomb'))}
+ else if(n==='color'){const g=mod(p.s-rot,N),t=stackTop(g),c=t>0&&rows[t-1][g]<NC?rows[t-1][g]:(p.c.find(v=>v<NC)??rnd(NC));p.c=p.c.map(()=>c);warn(ic('color')+tr('wCol'))}
+ else{freeze=5;warn(ic('freeze')+tr('wFrz'))}}
+function event(){evT=Math.max(8,18-level);const r=rnd(3);
+ if(r===0){warn(ic('rock')+tr('wRock'));for(let i=0;i<2+(level>3?1:0);i++){const g=rnd(N),t=stackTop(g);if(t<MAXL-1){while(rows.length<=t)rows.push(new Array(N).fill(-1));rows[t][g]=STONE}}}
+ else if(r===1){warn(ic('rev')+tr('wRev'));rev=6}else{warn(ic('fast')+tr('wFast'));fast=6}}
+BT.forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();useSkill(b.dataset.s)}));
+function setPause(v){if(state!=='play')return;paused=v;$('pz').style.display=v?'flex':'none'}
+function modeUI(on){const m=$('mode');m.className=on?'':'off';m.innerHTML=ic(on?'fast':'off')+tr(on?'evOn':'evOff')}
+$('pb').addEventListener('pointerdown',e=>{e.preventDefault();setPause(!paused)});
+$('rs').addEventListener('click',()=>setPause(false));
+$('ev').addEventListener('change',()=>modeUI($('ev').checked));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true)});
+modeUI(true);
+function drop1(){if(state!=='play'||paused)return;pulse=1;p.d-=1;if(p.d<=maxTop())land()}
+function rotate(s){if(state!=='play'||paused)return;rot+=rev>0?-s:s}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='play'||paused)return;
+ if(Math.hypot(e.clientX-cx,e.clientY-cy)<a0*1.05)drop1();else rotate(e.clientX<cx?-1:1)});
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')rotate(-1);else if(e.key==='ArrowRight')rotate(1);else if(e.key==='ArrowDown'||e.key===' ')drop1();else if(e.key==='1')useSkill('bomb');else if(e.key==='2')useSkill('color');else if(e.key==='3')useSkill('freeze');else if(e.key==='p'||e.key==='P'||e.key==='Escape')setPause(!paused)});
+$('go').addEventListener('click',start);
+function frame(t){const dt=Math.min(0.05,(t-last)/1000||0);last=t;
+ rotA+=(rot*PI4-rotA)*Math.min(1,dt*18);pulse=Math.max(0,pulse-dt*5);
+ if(state==='play'&&!paused){rev=Math.max(0,rev-dt);fast=Math.max(0,fast-dt);if(evOn){evT-=dt;if(evT<=0)event()}
+  if(freeze>0)freeze-=dt;else p.d-=(1.5+0.25*(level-1))*dt*(1+Math.min(level,20)*0.02)*(fast>0?2.2:1);
+  if(p&&p.d<=maxTop())land()}
+ fx.forEach(f=>f.t+=dt);fx=fx.filter(f=>f.t<0.35);skUI();draw();requestAnimationFrame(frame)}
+function draw(){ctx.clearRect(0,0,W,HT);ctx.fillStyle=col.bg;ctx.fillRect(0,0,W,HT);
+ ctx.lineWidth=1;ctx.strokeStyle=col.line;
+ for(let s=0;s<N;s++){const a=th(s)+H,r0=a0/CH,r1=(a0+(MAXL+2)*T)/CH;ctx.beginPath();ctx.moveTo(cx+r0*Math.cos(a),cy+r0*Math.sin(a));ctx.lineTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.stroke()}
+ ctx.setLineDash([5,5]);ctx.strokeStyle=col.sub;ring(MAXL);ctx.stroke();ctx.setLineDash([]);
+ ctx.lineWidth=1.6;ctx.strokeStyle=col.bg;
+ for(let k=0;k<rows.length;k++)for(let g=0;g<N;g++){const v=rows[k][g];if(v<0)continue;cell(th(g)+rotA,k,k+1);ctx.fillStyle=PAL[v];ctx.fill();ctx.stroke()}
+ ring(0);ctx.fillStyle=col.core;ctx.fill();
+ for(let g=0;g<N;g++){cell(th(g)+rotA,-0.3,0);ctx.fillStyle=PAL[g%NC];ctx.globalAlpha=.7;ctx.fill();ctx.globalAlpha=1;ctx.stroke()}
+ if(state==='play'&&p){const gd=maxTop();ctx.globalAlpha=.22;for(let i=0;i<p.w;i++){cell(th(p.s+i),gd,gd+1);ctx.fillStyle=PAL[p.c[i]];ctx.fill()}ctx.globalAlpha=1;
+  for(let i=0;i<p.w;i++){cell(th(p.s+i),p.d,p.d+1);ctx.fillStyle=PAL[p.c[i]];ctx.fill();ctx.stroke()}}
+ fx.forEach(f=>{ctx.globalAlpha=.9*(1-f.t/.35);cell(th(f.g)+rotA,f.k,f.k+1);ctx.fillStyle='#fff';ctx.fill()});ctx.globalAlpha=1;
+ const fs=a0*(0.62+pulse*0.12);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=col.sub;ctx.font='600 '+a0*0.2+'px system-ui,sans-serif';ctx.fillText(tr('sc').toUpperCase(),cx,cy-fs*0.62);
+ ctx.fillStyle=col.fg;ctx.font='800 '+fs*(score>9999?0.6:0.78)+'px system-ui,sans-serif';ctx.fillText(score,cx,cy+fs*0.08)}
+document.querySelectorAll('.langs').forEach(c=>c.innerHTML=[['en','English'],['ko','한국어'],['ja','日本語']].map(x=>'<button data-l="'+x[0]+'">'+x[1]+'</button>').join(''));
+document.addEventListener('click',e=>{const b=e.target.closest('.langs button');if(b)setLang(b.dataset.l)});
+let sv=null;try{sv=localStorage.getItem('octarisLang')}catch(e){}
+if(sv&&TX[sv])lang=sv;else $('lg').style.display='flex';
+applyLang();resize();hud();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
